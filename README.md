@@ -6,6 +6,8 @@ Also note, the output is sent to a file called dbfile.txt. View the results here
 
 
 The usage is as follows:
+
+
 Usage: Python3 [script-name-here] [username here] [flags]
 		Flags:
 			-h - Displays this message

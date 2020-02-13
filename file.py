@@ -10,6 +10,7 @@ headers = ({'User-Agent':
 def scrape():
 	global relatedusers
 	global imglinks
+	global request
 	relatedusers = {}
 	imglinks  = []
 	url = 'http://insee.me/u/' + sys.argv[1] + '/following'
@@ -62,6 +63,36 @@ def dbfile():
 			f.write('   ')
 	f.close()
 
+
+def dlimgofrelatedusers():
+	os.system('mkdir imgs-of-related-to-' + sys.argv[1] + ' > /dev/null 2>&1')
+	os.chdir('imgs-of-related-to-' + sys.argv[1])
+	print('Downloading imgs...')
+	i = 0
+	for k, v in relatedusers.items():
+		i = str(i)
+		os.system('curl ' + "'" + v + "'" + ' -o img' + i + '.jpg > /dev/null 2>&1')
+		i = int(i)
+		i+=1
+
+
+def dlimgsoftarget():
+	os.system('mkdir imgs-of-' + sys.argv[1] + '> /dev/null 2>&1')
+	os.chdir('imgs-of-' + sys.argv[1])
+	url = "http://insee.me/u/" + sys.argv[1]
+	request = get(url, headers=headers)
+	soup = BeautifulSoup(request.text, 'html.parser')
+	mainmedia = soup.find_all('a', class_='media main-media')
+	x = 0
+	for image in mainmedia:
+		image = image.div
+		image = image['data-src']
+		x = str(x)
+		os.system('curl ' + "'" + image + "'" + ' -o img' + x + '.jpg > /dev/null 2>&1')
+		x = int(x)
+		x += 1
+	print('Images downloaded to', 'imgs-of-' + sys.argv[1])
+
 try:
 	if sys.argv[1] == '-help' or sys.argv[1] == '-h':
 		print('''Usage: Python3 [script-name-here] [username here] [flags]
@@ -72,6 +103,15 @@ try:
 		Coded by 1d8
 		github.com/1d8
 		I love criticism.''')
+	elif '-d' or '--downloaded' in sys.argv:
+		scrape()
+		dlimgofrelatedusers()
+	#elif sys.argv[2] == '-d' or sys.argv[2] == '--download':
+	#	scrape()
+	#	dlimgofrelatedusers()
+	elif sys.argv[2] == '-du' or sys.argv[2] == '--download-user':
+		dlimgsoftarget()
+	
 	else:
 		scrape()
 		dbfile()

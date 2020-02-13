@@ -49,25 +49,30 @@ def dbfile():
 	f.write('\n')
 	f.write('   ')
 	#this checks if the -i flag exists to ensure that the user wants images
-	try:
-		if sys.argv[2] == '-i':
-			for k, v in relatedusers.items():
-				f.write(k + ' ' + v)
-				f.write('\n')
-				f.write('   ')
-	#if the -i flag isn't there, it causes an Indexerror, in this case go here
-	except IndexError:
+	#try:
+	if sys.argv[2] == '-i' or sys.argv[2] == '--images':
 		for k, v in relatedusers.items():
-			f.write(k)
+			f.write(k + ' ' + v)
 			f.write('\n')
 			f.write('   ')
+	else:
+		for k, v in relatedusers.items():
+			f.write(k + ' ')
+			f.write('\n')
+			f.write('  ')
+	#if the -i flag isn't there, it causes an Indexerror, in this case go here
+	#except IndexError:
+	#	for k, v in relatedusers.items():
+	#		f.write(k)
+	#		f.write('\n')
+	#		f.write('   ')
 	f.close()
 
 
 def dlimgofrelatedusers():
 	os.system('mkdir imgs-of-related-to-' + sys.argv[1] + ' > /dev/null 2>&1')
 	os.chdir('imgs-of-related-to-' + sys.argv[1])
-	print('Downloading imgs...')
+	print('Downloading profile pics of following list...')
 	i = 0
 	for k, v in relatedusers.items():
 		i = str(i)
@@ -83,6 +88,7 @@ def dlimgsoftarget():
 	request = get(url, headers=headers)
 	soup = BeautifulSoup(request.text, 'html.parser')
 	mainmedia = soup.find_all('a', class_='media main-media')
+	print('Downloading images posted by target')
 	x = 0
 	for image in mainmedia:
 		image = image.div
@@ -92,32 +98,45 @@ def dlimgsoftarget():
 		x = int(x)
 		x += 1
 	print('Images downloaded to', 'imgs-of-' + sys.argv[1])
+	
 
+#execute first ->
 try:
-	if sys.argv[1] == '-help' or sys.argv[1] == '-h':
-		print('''Usage: Python3 [script-name-here] [username here] [flags]
+	if sys.argv[1] == '--help' or sys.argv[1] == '-h':
+		print('''
+				Coded by 1d8
+				github.com/1d8
+			NOTE: Only 1 flag can be passed at a time
+		Usage: Python3 [script-name-here] [username here] [flag]
 		Flags:
-			-h - Displays this message
-			-i - Displays user images
-		
-		Coded by 1d8
-		github.com/1d8
-		I love criticism.''')
-	elif '-d' or '--downloaded' in sys.argv:
+			-h or --help- Displays this message
+			-i or --images - Displays user images
+			-n or --normal - Scrapes only usernames
+			-dr or --download-related - Downloads profile pics of users target follows
+			-dt or --download-target - Downloads first 10 images posted by target
+		''')
+	elif sys.argv[2] == '-dr' or sys.argv[2] == '--download-related':
 		scrape()
 		dlimgofrelatedusers()
-	#elif sys.argv[2] == '-d' or sys.argv[2] == '--download':
-	#	scrape()
-	#	dlimgofrelatedusers()
-	elif sys.argv[2] == '-du' or sys.argv[2] == '--download-user':
+	elif sys.argv[2] == '-i' or sys.argv[2] == '--images':
+		scrape()
+		dbfile()
+	elif sys.argv[2] == '-dt' or sys.argv[2] == '--download-related':
 		dlimgsoftarget()
-	
-	else:
+	elif sys.argv[2] == '-n' or sys.argv[2] == '--normal':
 		scrape()
 		dbfile()
 except IndexError:
-	print('''Usage: Python3 [script-name-here] [username here] [flags]
+	print('''
+				Coded by 1d8
+				github.com/1d8
+			NOTE: Only 1 flag can be passed at a time
+		Usage: Python3 [script-name-here] [username here] [flag]
 		Flags:
-			-h - Displays this message
-			-i - Displays user images''')
+			-h or --help- Displays this message
+			-i or --images - Displays user images
+			-n or --normal - Scrapes only usernames
+			-dr or --download-related - Downloads profile pics of users target follows
+			-dt or --download-target - Downloads first 10 images posted by target
+		''')
 	sys.exit()
